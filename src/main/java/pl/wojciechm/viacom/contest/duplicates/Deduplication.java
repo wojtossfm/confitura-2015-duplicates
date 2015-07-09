@@ -1,7 +1,6 @@
-package pl.wojciech.viacom.contest.duplicates;
+package pl.wojciechm.viacom.contest.duplicates;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +8,20 @@ import java.util.List;
  * Created by wojciechm on 2015-07-08.
  */
 public class Deduplication {
+
+    /**
+     * Checks whether any of the subclasses of Object overwrote the equals method.
+     * @param instance The Class that is to be checked
+     * @return true if the equals method was overwritten
+     */
+    public static boolean equalsOverwritten(Class<?> instance) {
+        try {
+            return instance.getDeclaredMethod("equals", Object.class).getDeclaringClass() != Object.class;
+        } catch (NoSuchMethodException nsme) {
+            // not really possible since hashcode is implemented by Object
+            return false;
+        }
+    }
 
     /**
      * Checks whether any of the subclasses of Object overwrote the hashCode method.
@@ -48,7 +61,7 @@ public class Deduplication {
                 if (Deduplication.hashableOverwritten(type) || type == String.class) {
                     fieldHash = type.getCanonicalName() + Integer.toString(field.get(instance).hashCode());
                 } else {
-                    System.out.println(type);
+                    //System.out.println(type);
                     fieldHash = type.getCanonicalName() + Deduplication.customHash(field.get(instance));
                 }
             }
@@ -69,9 +82,25 @@ public class Deduplication {
         if (input == null || input.isEmpty()) {
             return;
         }
+
         Iterator<T> iterator = input.iterator();
-        boolean somethingOverwritesHashcode = Deduplication.hashableOverwritten(input.get(0).getClass());
-        if (somethingOverwritesHashcode) {
+        boolean useObjectHashCodes = true;
+        while (iterator.hasNext()) {
+            T current = iterator.next();
+            if (!Deduplication.hashableOverwritten(current.getClass())) {
+                useObjectHashCodes = false;
+                break;
+            }
+            if (!Deduplication.equalsOverwritten(current.getClass())) {
+                useObjectHashCodes = false;
+                break;
+            }
+        }
+
+        iterator = input.iterator();
+
+        if (useObjectHashCodes) {
+            //System.out.println("Using class hashcodes for " + input);
             HashSet<T> store = new HashSet<>();
             while (iterator.hasNext()) {
                 T current = iterator.next();
@@ -84,6 +113,7 @@ public class Deduplication {
                 }
             }
         } else {
+            //System.out.println("Using custom hashcodes for " + input);
             HashSet<Integer> store = new HashSet<>();
             while (iterator.hasNext()) {
                 T current = iterator.next();

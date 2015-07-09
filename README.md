@@ -21,7 +21,8 @@ We are hiring! Visit our [career site](http://tech.viacom.com/careers/).
 ## Solution
 
 Assuming that the hashCode/equals methods run in O(1) time then the deduplication solution runs in O(n) time.
-If objects don't overwrite hashCode then the customHash static method will be used as a substitute and it will run slower
-due to using reflection and far more accessors.
+If objects don't overwrite hashCode and equals then the customHash static method will be used as a substitute.
+It will most likely run slower due to using reflection and far more accessors.
+Implementation might need to be changed depending on what is to be treated as a duplicate and what isn't.
 
 Currently mixing superclasses with subclasses hasn't been tested and probably isn't supported.
