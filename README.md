@@ -26,3 +26,7 @@ It will most likely run slower due to using reflection and far more accessors.
 Implementation might need to be changed depending on what is to be treated as a duplicate and what isn't.
 
 Currently mixing superclasses with subclasses hasn't been tested and probably isn't supported.
+
+Could reduce number of iterations performed through the list (the overwrite check) by performing it on the fly and
+switching hashsets when a change from overwrite to mixed is detected, but decided that it's a minor change in comparison
+to the whole problem and I already spent more time than I wanted to working on the contest problems.
